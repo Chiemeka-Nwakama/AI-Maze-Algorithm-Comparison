@@ -1,4 +1,5 @@
 import contextlib
+import random
 
 
 class maze:
@@ -99,61 +100,54 @@ class maze:
         return a
     
     
-    import random
+
+
 
 def generate_maze(x):
-    # Initialize maze with all walls
-    maze = {(i, j): ['U', 'D', 'L', 'R'] for i in range(x) for j in range(x)}
-    
-    # Randomly choose a starting point
-    start = (random.randint(0, x - 1), random.randint(0, x - 1))
-    maze[start] = []
+    '''
+    Generate a random maze of size x by x that is solvable from (0, 0) to (x-1, x-1).
 
-    # List of visited cells
-    visited = [start]
-    
-    while visited:
-        current = visited[-1]
-        
-        # Get neighbors of the current cell
-        neighbors = [
-            (current[0] - 1, current[1]),  # Up
-            (current[0] + 1, current[1]),  # Down
-            (current[0], current[1] - 1),  # Left
-            (current[0], current[1] + 1)   # Right
-        ]
-        
-        # Shuffle the neighbors randomly
+    x: An integer representing the size of the maze.
+
+    Returns: A tuple containing a dictionary with integer pairs as the key and information about walls as the value and a tuple representing the goal location.
+    '''
+    # Initialize the maze
+    maze = {}
+    for i in range(x):
+        for j in range(x):
+            maze[(i, j)] = []
+
+    # Generate the maze
+    visited = set()
+    stack = [(0, 0)]
+    while stack:
+        current = stack.pop()
+        visited.add(current)
+        neighbors = [(current[0] - 1, current[1]), (current[0] + 1, current[1]), (current[0], current[1] - 1), (current[0], current[1] + 1)]
         random.shuffle(neighbors)
-        
-        found = False
         for neighbor in neighbors:
-            if 0 <= neighbor[0] < x and 0 <= neighbor[1] < x and neighbor not in visited:
-                # Remove the wall between the current cell and the neighbor
-                if neighbor[0] < current[0]:
-                    maze[current].remove('U')
-                    maze[neighbor].remove('D')
-                elif neighbor[0] > current[0]:
-                    maze[current].remove('D')
-                    maze[neighbor].remove('U')
-                elif neighbor[1] < current[1]:
-                    maze[current].remove('L')
-                    maze[neighbor].remove('R')
-                elif neighbor[1] > current[1]:
-                    maze[current].remove('R')
-                    maze[neighbor].remove('L')
-                
-                visited.append(neighbor)
-                found = True
-                break
-        
-        if not found:
-            visited.pop()
-    
-    # Choose a random goal position at the end of the path
-    goal = visited[-1]
-    
+            if neighbor in visited or neighbor[0] < 0 or neighbor[0] >= x or neighbor[1] < 0 or neighbor[1] >= x:
+                continue
+            if neighbor[0] == current[0] - 1:
+                maze[current].append('U')
+                maze[neighbor].append('D')
+            if neighbor[0] == current[0] + 1:
+                maze[current].append('D')
+                maze[neighbor].append('U')
+            if neighbor[1] == current[1] - 1:
+                maze[current].append('L')
+                maze[neighbor].append('R')
+            if neighbor[1] == current[1] + 1:
+                maze[current].append('R')
+                maze[neighbor].append('L')
+            stack.append(neighbor)
+
+    # Set the goal location
+    goal = (x - 1, x - 1)
+
+    # Return the maze and the goal location
     return maze, goal
+
 
 
 
@@ -173,6 +167,11 @@ def main():
     goal = (2,2)
 
     example_maze = maze(environment, goal, loc)
+    environment2, goal2 = generate_maze(25)
+    print(environment2)
+    print(goal2)
+
+    example_maze2 = maze(environment2, goal2, loc)
 
     # Checking possible_actions works correctly 
     # i = 0
@@ -197,7 +196,7 @@ def main():
     #             print(a, "  =====  ", example_maze.result(a))
     #         i += 1
 
-    example_maze.solve()
+    example_maze2.solve()
 
 
 if __name__ == '__main__':
