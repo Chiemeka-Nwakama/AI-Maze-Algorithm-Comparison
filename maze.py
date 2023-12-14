@@ -114,52 +114,69 @@ class maze:
         else:
             a = self.untried[s_curr].pop(0)
         return a
+import random
 
 def generate_maze(x):
-    '''
-    Generate a random maze of size x by x that is solvable from (0, 0) to (x-1, x-1).
+    n = x
+    m = x
+    maze = [[0 for j in range(m)] for i in range(n)]
+    for i in range(n):
+        for j in range(m):
+            if i == 0 and j == 0:
+                maze[i][j] = ['R', 'D']
+            elif i == 0 and j == m - 1:
+                maze[i][j] = ['L', 'D']
+            elif i == n - 1 and j == 0:
+                maze[i][j] = ['R', 'U']
+            elif i == n - 1 and j == m - 1:
+                maze[i][j] = ['L', 'U']
+            elif i == 0:
+                maze[i][j] = ['L', 'R', 'D']
+            elif i == n - 1:
+                maze[i][j] = ['L', 'R', 'U']
+            elif j == 0:
+                maze[i][j] = ['R', 'U', 'D']
+            elif j == m - 1:
+                maze[i][j] = ['L', 'U', 'D']
+            else:
+                maze[i][j] = ['L', 'R', 'U', 'D']
 
-    x: An integer representing the size of the maze.
-
-    Returns: A tuple containing a dictionary with integer pairs as the key and information about walls as the value and a tuple representing the goal location.
-    '''
-    # Initialize the maze
-    maze = {}
-    for i in range(x):
-        for j in range(x):
-            maze[(i, j)] = []
-
-    # Generate the maze
     visited = set()
     stack = [(0, 0)]
     while stack:
-        current = stack.pop()
-        visited.add(current)
-        neighbors = [(current[0] - 1, current[1]), (current[0] + 1, current[1]), (current[0], current[1] - 1), (current[0], current[1] + 1)]
-        random.shuffle(neighbors)
-        for neighbor in neighbors:
-            if neighbor in visited or neighbor[0] < 0 or neighbor[0] >= x or neighbor[1] < 0 or neighbor[1] >= x:
-                continue
-            if neighbor[0] == current[0] - 1:
-                maze[current].append('U')
-                maze[neighbor].append('D')
-            if neighbor[0] == current[0] + 1:
-                maze[current].append('D')
-                maze[neighbor].append('U')
-            if neighbor[1] == current[1] - 1:
-                maze[current].append('L')
-                maze[neighbor].append('R')
-            if neighbor[1] == current[1] + 1:
-                maze[current].append('R')
-                maze[neighbor].append('L')
-            stack.append(neighbor)
+        (i, j) = stack.pop()
+        visited.add((i, j))
 
-    # Set the goal location
-    goal = (x - 1, x - 1)
+        neighbors = []
+        if i > 0 and (i - 1, j) not in visited:
+            neighbors.append((i - 1, j))
+        if i < n - 1 and (i + 1, j) not in visited:
+            neighbors.append((i + 1, j))
+        if j > 0 and (i, j - 1) not in visited:
+            neighbors.append((i, j - 1))
+        if j < m - 1 and (i, j + 1) not in visited:
+            neighbors.append((i, j + 1))
 
-    # Return the maze and the goal location
+        if neighbors:
+            (ni, nj) = random.choice(neighbors)
+            if ni < i:
+                maze[i][j].remove('U')
+                maze[ni][nj].remove('D')
+            elif ni > i:
+                maze[i][j].remove('D')
+                maze[ni][nj].remove('U')
+            elif nj < j:
+                maze[i][j].remove('L')
+                maze[ni][nj].remove('R')
+            elif nj > j:
+                maze[i][j].remove('R')
+                maze[ni][nj].remove('L')
+
+            stack.append((i, j))
+            stack.append((ni, nj))
+
+    goal = (n - 1, m - 1)
     return maze, goal
-
 
 def main():
     loc = (0,0)
@@ -181,7 +198,7 @@ def main():
     example_maze.solve()
     # print("Loc: ", example_maze.loc, "Goal: ", example_maze.goal)
 
-    environment2, goal2 = generate_maze(5)
+    environment2, goal2 = generate_maze(10)
     print(environment2)
     maze2 = maze(environment2, goal2, loc)
     # maze2.solve()
