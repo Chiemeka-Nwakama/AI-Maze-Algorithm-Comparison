@@ -58,10 +58,25 @@ class maze:
         elif action == 'D':
             self.loc = (self.loc[0], self.loc[1] - 1)
         return self.loc
-        
+    
+    def test_result(self, action, curr):
+        if action == 'R':
+            curr =  (curr[0] + 1, curr[1])
+        elif action == 'L':
+            curr =  (curr[0] - 1, curr[1])
+        elif action == 'U':
+            curr =  (curr[0], curr[1] + 1)
+        elif action == 'D':
+            curr = (curr[0], curr[1] - 1)
+        return curr
     
     def isGoal(self):
         return self.loc == self.goal
+    
+    def find_back_action(self, temp, curr):
+        for action in ['U', 'D', 'L', 'R']:
+            if self.test_result(action, curr) == temp:
+                return action
     
     def solve(self):
         a = None
@@ -72,14 +87,11 @@ class maze:
         while True:
             a = self.online_dfs_Agent(s_curr, s_prev, a)
             if a == None: break
-            # s_curr = self.result(a, s_curr)
+            s_prev = s_curr
             s_curr = self.result(a)
             actions_taken.append(a)
-            # print("loc == ", self.loc, "\n action == ", a) # used for debugging
-        # print(self.loc, " == ", self.goal) # used for debugging 
+            print("Loc: ", self.loc, "Action: ", a)
         print("actions_taken ==", actions_taken)
-        # print("trimed == ", self.trim_actions(actions_taken))    # self.trim_actions not working 
-        # return self.trim_actions(actions_taken)  # Want to return this once self.trim_actions works
         return actions_taken
 
     def online_dfs_Agent(self, s_curr, s_prev, a):
@@ -88,20 +100,20 @@ class maze:
             self.untried.update({s_curr: self.possible_actions(s_curr)})
         if s_prev != None:
             self.results.update({s_curr: (s_prev, a)})
-            self.unbacktracked.update({s_curr: s_prev})
+            if s_curr in self.unbacktracked:
+                self.unbacktracked[s_curr].append(s_prev)
+            else:
+                self.unbacktracked.update({s_curr: [s_prev]})
         if not self.untried[s_curr]: # returns True if list is empty
             if not self.unbacktracked[s_curr]: return None
-            else: 
-                a = self.unbacktracked[s_curr].pop(0)
+            else:
+                # print("Unbacktracked: ", self.unbacktracked, "Loc: ", self.loc) # Used to debug
+                temp = self.unbacktracked[s_curr].pop()
+                a = self.find_back_action(temp, s_curr)
+                # print("Action: ", a) # Used to debug
         else:
             a = self.untried[s_curr].pop(0)
-        s_prev = s_curr
-        # print(self.unbacktracked)
         return a
-    
-    
-
-
 
 def generate_maze(x):
     '''
@@ -149,8 +161,6 @@ def generate_maze(x):
     return maze, goal
 
 
-
-
 def main():
     loc = (0,0)
     environment = {
@@ -167,36 +177,14 @@ def main():
     goal = (2,2)
 
     example_maze = maze(environment, goal, loc)
-    environment2, goal2 = generate_maze(25)
+    # print("Starting: \n", "Loc: ", example_maze.loc, "Goal: ", example_maze.goal)
+    example_maze.solve()
+    # print("Loc: ", example_maze.loc, "Goal: ", example_maze.goal)
+
+    environment2, goal2 = generate_maze(5)
     print(environment2)
-    print(goal2)
-
-    example_maze2 = maze(environment2, goal2, loc)
-
-    # Checking possible_actions works correctly 
-    # i = 0
-    # for x in range(0,3):
-    #     print("X change: ", x)
-    #     for y in range(0, 3):
-    #         print(i, ".)  ", "(", x, ", ", y, ")")
-    #         actions = example_maze.possible_actions((x,y))
-    #         print(actions)
-    #         i += 1
-
-    # Checking result() works correctly 
-    # i = 0
-    # for x in range(0,3):
-    #     print("X change: ", x)
-    #     for y in range(0, 3):
-    #         print(i, ".)  ", "(", x, ", ", y, ")")
-    #         actions = example_maze.possible_actions((x,y))
-    #         print(actions)
-    #         for a in actions:
-    #             example_maze.loc = (x,y)
-    #             print(a, "  =====  ", example_maze.result(a))
-    #         i += 1
-
-    example_maze2.solve()
+    maze2 = maze(environment2, goal2, loc)
+    # maze2.solve()
 
 
 if __name__ == '__main__':
