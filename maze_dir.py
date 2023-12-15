@@ -31,13 +31,40 @@ class maze:
         self.width = width
         self.height = height
     
-    def make_list(self):
-        directions = ['U', 'D', 'R', 'L']
-        return random.sample(directions, k=4)
+    def make_list(self, loc, goal):
+        X_dir = goal[0] - loc[0]
+        Y_dir = goal[1] - loc[1]
+        full = ['U', 'D', 'R', 'L']
+        ret_list = []
+        
+        if (abs(X_dir) >= abs(Y_dir)):
+            if X_dir > 0:
+                ret_list.append('U')
+            else:
+                ret_list.append('D')
+            if Y_dir > 0:
+                ret_list.append('R')
+            else:
+                ret_list.append('L')
+            # print(ret_list) # Used to debug
+            return ret_list + list(set(full) - set(ret_list))
+
+        if (abs(X_dir) < abs(Y_dir)):
+            if X_dir > 0:
+                ret_list.append('U')
+            else:
+                ret_list.append('D')
+            if Y_dir > 0:
+                ret_list.append('R')
+            else:
+                ret_list.append('L')
+            # print(ret_list) # Used to debug
+            return ret_list + list(set(full) - set(ret_list))
+        
 
     def possible_actions(self, loc):
         walls = self.loc
-        actions = ['U', 'D', 'R', 'L'] # TODO: randomize this line
+        actions = self.make_list(self.loc, self.goal)
         if loc[1] == 0:
             with contextlib.suppress(ValueError):
                 actions.remove('D')
@@ -175,15 +202,15 @@ def main():
     }
     goal = (2,2)
 
-    example_maze = maze(environment, goal, loc)
+    # example_maze = maze(environment, goal, loc)
     # print("Starting: \n", "Loc: ", example_maze.loc, "Goal: ", example_maze.goal)
-    example_maze.solve()
+    # example_maze.solve()
     # print("Loc: ", example_maze.loc, "Goal: ", example_maze.goal)
 
-    # environment2, goal2, loc2 = generate_maze(10, 10)
-    # print(environment2, "\n", goal2, "\n", loc2)
-    # maze2 = maze(environment2, goal2, loc2, 9, 9)
-    # maze2.solve()
+    environment2, goal2, loc2 = generate_maze(10, 10)
+    print(environment2, "\n", goal2, "\n", loc2)
+    maze2 = maze(environment2, goal2, loc2, 9, 9)
+    maze2.solve()
 
 
 if __name__ == '__main__':
