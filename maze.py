@@ -37,7 +37,7 @@ class maze:
 
     def possible_actions(self, loc):
         walls = self.loc
-        actions = ['U', 'D', 'R', 'L'] # TODO: randomize this line
+        actions = self.make_list()
         if loc[1] == 0:
             with contextlib.suppress(ValueError):
                 actions.remove('D')

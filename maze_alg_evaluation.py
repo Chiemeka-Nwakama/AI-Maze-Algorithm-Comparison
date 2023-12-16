@@ -1,16 +1,10 @@
 import contextlib
 import random
-
 import random
 import threading
-
 import time
-
 import os
-
 import sys
-
-
 import threading
 import time
 
@@ -58,7 +52,6 @@ class maze:
         self.height = height
         self.time = 0
         self.end_time = 0
-
     
     def make_list(self, loc, goal):
         X_dir = goal[0] - loc[0]
@@ -90,11 +83,13 @@ class maze:
             # print(ret_list) # Used to debug
             return ret_list + list(set(full) - set(ret_list))
         
+    def make_list_unDir(self):
+        directions = ['U', 'D', 'R', 'L']
+        return random.sample(directions, k=4)
     
-
     def possible_actions_unDir(self, loc):
         walls = self.loc
-        actions = ['U', 'D', 'R', 'L'] # TODO: randomize this line
+        actions = self.make_list_unDir()
         if loc[1] == 0:
             with contextlib.suppress(ValueError):
                 actions.remove('D')
@@ -237,12 +232,7 @@ class maze:
             a = self.untried[s_curr].pop(0)
         return a
 
-
-
-
 def generate_maze(width, height):
-    
-  
     maze = {(x, y): [] for x in range(width) for y in range(height)}
 
     def carve_path(x, y):
@@ -272,24 +262,16 @@ def generate_maze(width, height):
 
     return maze, (start_x, start_y), (goal_x, goal_y)
 
-
-
 def print_maze(maze, width, height):
     for y in range(height):
         for x in range(width):
             print(' '.join(maze[(x, y)]), end=' ')
         print()
 
-
 def clearPreviousSolve(self):
     self.results = dict()
     self.untried = dict()
     self.unbacktracked = dict()
-
-
-
-
-
 
         # Function to handle maze solving with timeout
 def isMazeSolvable(timeLimit,maze):
@@ -303,21 +285,12 @@ def isMazeSolvable(timeLimit,maze):
    
         # Maze solving is taking too long, generate a new maze
         print("Maze solving is taking too long. Generating a new maze...")
-        
-
-
-
-
-    
+ 
         return -1
       
     return 0
     
-
-    
-def evaluation(maze_size, simulations): 
-   
-   
+def evaluation(maze_size, simulations):
     environment, goal, loc = None, None, None
     generated = -1
     nonDirected_Dfs_num_actions = 0
@@ -359,29 +332,6 @@ def evaluation(maze_size, simulations):
 
 
 def main():
-    loc = (0,0)
-    environment = {
-        (0,0) : [],
-        (0,1) : ['U', 'R'],
-        (0,2) : ['D'],
-        (1,0) : [],
-        (1,1) : ['L', 'R'],
-        (1,2) : ['R'],
-        (2,0) : [],
-        (2,1) : ['L'],
-        (2,2) : ['L']
-    }
-    goal = (2,2)
-
-    # example_maze = maze(environment, goal, loc)
-    # print("Starting: \n", "Loc: ", example_maze.loc, "Goal: ", example_maze.goal)
-    # example_maze.solve()
-    # print("Loc: ", example_maze.loc, "Goal: ", example_maze.goal)
-
-    # environment, goal, loc = generate_maze(10, 10)
-    # # print(environment, "\n", goal2, "\n", loc2)
-    # maze2 = maze(environment2, goal2, loc2, 9, 9)
-    # maze2.solve()
     results = evaluation(25, 15)
     print(results[4])
     os._exit(1) #Exits forceably if threads are still running
