@@ -1,12 +1,21 @@
 import contextlib
 import random
+
 import random
 import threading
+
 import time
+
 import os
+
 import sys
+import maze_alg_evaluation
+
+
 import threading
 import time
+maze_alg_evaluation.doc_name = ""
+maze_alg_evaluation.file = None
 
 class MyThread(threading.Thread):
     def __init__(self):
@@ -52,6 +61,7 @@ class maze:
         self.height = height
         self.time = 0
         self.end_time = 0
+
     
     def make_list(self, loc, goal):
         X_dir = goal[0] - loc[0]
@@ -83,13 +93,11 @@ class maze:
             # print(ret_list) # Used to debug
             return ret_list + list(set(full) - set(ret_list))
         
-    def make_list_unDir(self):
-        directions = ['U', 'D', 'R', 'L']
-        return random.sample(directions, k=4)
     
+
     def possible_actions_unDir(self, loc):
         walls = self.loc
-        actions = self.make_list_unDir()
+        actions = ['U', 'D', 'R', 'L'] # TODO: randomize this line
         if loc[1] == 0:
             with contextlib.suppress(ValueError):
                 actions.remove('D')
@@ -158,10 +166,12 @@ class maze:
                 return action
     
     def solveDir(self):
+        beg_time = time.time()
         a = None
         s_prev = None
         s_curr = self.loc
         actions_taken = []
+
 
         while True:
             a = self.online_dfs_Agent_Dir(s_curr, s_prev, a)
@@ -172,9 +182,11 @@ class maze:
             actions_taken.append(a)
             # print("Loc: ", self.loc, "Action: ", a) # Used to debug
         print("actions_taken ==", actions_taken)
-        return actions_taken
+        end_time = time.time()
+        return (actions_taken, (end_time - beg_time))
 
     def online_dfs_Agent_Dir(self, s_curr, s_prev, a):
+        
         if self.isGoal() == True: return None
         if s_curr not in self.untried:
             self.untried.update({s_curr: self.possible_actions_Dir(s_curr)})
@@ -196,6 +208,7 @@ class maze:
         return a
 
     def solve(self):
+        beg_time = time.time()
         a = None
         s_prev = None
         s_curr = self.loc
@@ -209,7 +222,8 @@ class maze:
             actions_taken.append(a)
             # print("Loc: ", self.loc, "Action: ", a) # Used to debug
         print("actions_taken ==", actions_taken)
-        return actions_taken
+        end_time = time.time()
+        return (actions_taken, (end_time - beg_time))
 
     def online_dfs_Agent(self, s_curr, s_prev, a):
         if self.isGoal() == True: return None
@@ -232,7 +246,12 @@ class maze:
             a = self.untried[s_curr].pop(0)
         return a
 
+
+
+
 def generate_maze(width, height):
+    
+  
     maze = {(x, y): [] for x in range(width) for y in range(height)}
 
     def carve_path(x, y):
@@ -262,16 +281,24 @@ def generate_maze(width, height):
 
     return maze, (start_x, start_y), (goal_x, goal_y)
 
+
+
 def print_maze(maze, width, height):
     for y in range(height):
         for x in range(width):
             print(' '.join(maze[(x, y)]), end=' ')
         print()
 
-def clearPreviousSolve(self):
-    self.results = dict()
-    self.untried = dict()
-    self.unbacktracked = dict()
+
+# def clearPreviousSolve(self):
+#     self.results = dict()
+#     self.untried = dict()
+#     self.unbacktracked = dict()
+
+
+
+
+
 
         # Function to handle maze solving with timeout
 def isMazeSolvable(timeLimit,maze):
@@ -285,24 +312,38 @@ def isMazeSolvable(timeLimit,maze):
    
         # Maze solving is taking too long, generate a new maze
         print("Maze solving is taking too long. Generating a new maze...")
- 
+        
+
+
+
+
+    
         return -1
       
     return 0
     
-def evaluation(maze_size, simulations):
+
+    
+def evaluation(maze_size, simulations): 
+    random_number = random.random()
+    random_integer = random.randint(1, 1000)
+    maze_alg_evaluation.doc_name = str(random_integer) + "_" + "mazesize_" + str(maze_size) + "_simulations_" + str(simulations) + ".txt"
+    maze_alg_evaluation.file = open(maze_alg_evaluation.doc_name, 'w')
+
     environment, goal, loc = None, None, None
     generated = -1
     nonDirected_Dfs_num_actions = 0
     nonDirected_DfsSims = []
     directed_DfsSims = []
+    nonDirected_Dfs_times = 0
+    directed_Dfs_times = 0
     directed_Dfs_num_actions = 0
     numSim = 0
     while numSim < simulations:
 
         generated = -1
         while generated == -1:
-            print("asdfads")
+       
             environment, goal, loc = generate_maze(maze_size, maze_size)
             evaluation_maze = maze(environment, goal, loc, maze_size, maze_size)
             generated = isMazeSolvable(3, evaluation_maze)
@@ -310,13 +351,23 @@ def evaluation(maze_size, simulations):
         # environment, goal, loc = generate_maze(maze_size, maze_size)
         evaluation_maze = maze(environment, goal, loc, maze_size, maze_size)
         nonDirected_Dfs = evaluation_maze.solve()
+        nonDirected_Dfs_time = nonDirected_Dfs[1]
+        nonDirected_Dfs = nonDirected_Dfs[0]
         evaluation_maze = maze(environment, goal, loc, maze_size, maze_size)
         directed_Dfs = evaluation_maze.solveDir()
+        directed_Dfs_time = directed_Dfs[1]
+        directed_Dfs = directed_Dfs[0]
 
         nonDirected_Dfs_num_actions = nonDirected_Dfs_num_actions + len(nonDirected_Dfs)
         directed_Dfs_num_actions =  directed_Dfs_num_actions + len(directed_Dfs)
+        directed_Dfs_times = directed_Dfs_times + directed_Dfs_time
+        nonDirected_Dfs_times = nonDirected_Dfs_times + nonDirected_Dfs_time
         nonDirected_DfsSims.append(nonDirected_Dfs)
         directed_DfsSims.append(directed_Dfs)
+
+        print("Simulation " + str(numSim) + "\n" +  "Non-directed DFS Number of Actions: " + str(len(nonDirected_Dfs)) + "\n" + "Directed DFS Number of Actions: " + str(len(directed_Dfs)) + "\n" + "Non-directed DFS Solve Time: " + str(nonDirected_Dfs_time) + "\n" + "Directed DFS Solve Time: " + str(directed_Dfs_time) +"\n")
+        maze_alg_evaluation.file.write("Simulation " + str(numSim) + "\n" +  "Non-directed DFS Number of Actions: " + str(len(nonDirected_Dfs)) + "\n" + "Directed DFS Number of Actions: " + str(len(directed_Dfs)) + "\n" + "Non-directed DFS Solve Time: " + str(nonDirected_Dfs_time) + "\n" + "Directed DFS Solve Time: " + str(directed_Dfs_time) +"\n")
+        maze_alg_evaluation.file.write("-------------------------------------------\n")
         numSim = numSim + 1
 
     results = (
@@ -324,16 +375,44 @@ def evaluation(maze_size, simulations):
         directed_DfsSims,
         nonDirected_Dfs_num_actions//simulations,
         directed_Dfs_num_actions//simulations,
-        "Ran for " +  str(simulations) + " simulations\n" +  "Avg Non-directed DFS Number of Actions: " + str(nonDirected_Dfs_num_actions) + "\n" +
-        "Avg Directed DFS Number of Actions: " + str(directed_Dfs_num_actions)
+        directed_Dfs_times//simulations,
+        nonDirected_Dfs_times//simulations,
+        "Ran for " +  str(simulations) + " simulations\n" +  "Avg Non-directed DFS Number of Actions: " + str(nonDirected_Dfs_num_actions//simulations) + "\n" +  "Avg Directed DFS Number of Actions: " + str(directed_Dfs_num_actions//simulations) + "\n" +  "Avg Non-directed DFS Solve Time: " + str(nonDirected_Dfs_times/simulations) + "\n" + "Avg Directed DFS Solve Time: " + str(directed_Dfs_times/simulations)
+       
     )
 
     return results
 
 
 def main():
-    results = evaluation(25, 15)
-    print(results[4])
+    loc = (0,0)
+    environment = {
+        (0,0) : [],
+        (0,1) : ['U', 'R'],
+        (0,2) : ['D'],
+        (1,0) : [],
+        (1,1) : ['L', 'R'],
+        (1,2) : ['R'],
+        (2,0) : [],
+        (2,1) : ['L'],
+        (2,2) : ['L']
+    }
+    goal = (2,2)
+
+    # example_maze = maze(environment, goal, loc)
+    # print("Starting: \n", "Loc: ", example_maze.loc, "Goal: ", example_maze.goal)
+    # example_maze.solve()
+    # print("Loc: ", example_maze.loc, "Goal: ", example_maze.goal)
+
+    # environment, goal, loc = generate_maze(10, 10)
+    # # print(environment, "\n", goal2, "\n", loc2)
+    # maze2 = maze(environment2, goal2, loc2, 9, 9)
+    # maze2.solve()
+    results = evaluation(25, 3)
+    print(results[6])
+
+    maze_alg_evaluation.file.write(results[6])
+    maze_alg_evaluation.file.close()
     os._exit(1) #Exits forceably if threads are still running
 
 if __name__ == '__main__':
