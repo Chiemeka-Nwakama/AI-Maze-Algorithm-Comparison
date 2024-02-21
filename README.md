@@ -1,4 +1,5 @@
-# Abstract
+# Comparative Analysis of Pathfinding Algorithms Online DFS and Directed Online DFS on Grid World
+
 The Grid World problem type requires a pathfinding algorithm to navigate an agent from a start to a goal node on a
 grid. The choice of algorithm impacts the agent’s route and
 computational efficiency. This study compared the Online
